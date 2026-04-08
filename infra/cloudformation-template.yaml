@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: GA4GH Registry - ECS EC2 + RDS PostgreSQL Stack
+Description: GA4GH Implementation Registry - ECS EC2 + RDS PostgreSQL Stack
 
 Parameters:
   Environment:
@@ -210,7 +210,7 @@ Resources:
       DBName: !Ref DatabaseName
       DBInstanceClass: !Ref DatabaseInstanceClass
       Engine: postgres
-      EngineVersion: '15.4'
+      EngineVersion: '15'
       MasterUsername: !Ref DatabaseUsername
       MasterUserPassword: !Ref DatabasePassword
       AllocatedStorage: '20'
