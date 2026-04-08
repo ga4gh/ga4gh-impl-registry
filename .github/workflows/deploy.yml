@@ -77,6 +77,17 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Create ECR repository if it does not exist
+        run: |
+          aws ecr describe-repositories \
+            --repository-names ${{ env.ECR_REPOSITORY }} \
+            --region ${{ env.AWS_REGION }} 2>/dev/null || \
+          aws ecr create-repository \
+            --repository-name ${{ env.ECR_REPOSITORY }} \
+            --region ${{ env.AWS_REGION }} \
+            --image-scanning-configuration scanOnPush=true \
+            --image-tag-mutability MUTABLE  
+
       - name: Get next version from ECR
         id: versioning
         env:
