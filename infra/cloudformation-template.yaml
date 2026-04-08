@@ -404,10 +404,13 @@ Resources:
       VpcId: !Ref VPC
       TargetType: instance
       HealthCheckPath: /api/service-info
-      HealthCheckIntervalSeconds: 30
-      HealthCheckTimeoutSeconds: 5
+      HealthCheckIntervalSeconds: 60
+      HealthCheckTimeoutSeconds: 30
       HealthyThresholdCount: 2
-      UnhealthyThresholdCount: 3
+      UnhealthyThresholdCount: 10
+      HealthCheckProtocol: HTTP
+      Matcher:
+        HttpCode: 200-499
 
   ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
