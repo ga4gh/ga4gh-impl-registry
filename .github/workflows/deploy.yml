@@ -1,143 +1,19 @@
-name: Build and Deploy to AWS
+name: Deploy to CloudFormation
 
 on:
-  push:
-    branches:
-      - main
-    # Only trigger when actual code or config changes — not docs, markdown etc.
-    paths:
-      - 'src/**'
-      - 'build.gradle'
-      - 'settings.gradle'
-      - 'Dockerfile'
-      - 'infra/**'
-      - '.github/workflows/**'
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Deployment environment'
+      image_uri:
+        description: 'Full ECR image URI to deploy (e.g. 123456789.dkr.ecr.us-east-2.amazonaws.com/ga4gh-impl-registry:0.1.0)'
         required: true
-        default: 'production'
-        type: choice
-        options:
-          - production
+        type: string
 
 env:
   AWS_REGION: us-east-2
-  ECR_REPOSITORY: ga4gh-impl-registry
   STACK_NAME: ga4gh-impl-registry
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    outputs:
-      image-uri: ${{ steps.image.outputs.image-uri }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: gradle
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: src/main/frontend/package-lock.json
-
-      - name: Build with Gradle
-        run: ./gradlew build -x test --no-daemon
-
-      - name: Run tests
-        if: false
-        run: ./gradlew test --no-daemon
-
-      - name: Generate test coverage
-        if: false
-        run: ./gradlew jacocoTestReport --no-daemon
-
-      - name: Setting Up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Create ECR repository if it does not exist
-        run: |
-          aws ecr describe-repositories \
-            --repository-names ${{ env.ECR_REPOSITORY }} \
-            --region ${{ env.AWS_REGION }} 2>/dev/null || \
-          aws ecr create-repository \
-            --repository-name ${{ env.ECR_REPOSITORY }} \
-            --region ${{ env.AWS_REGION }} \
-            --image-scanning-configuration scanOnPush=true \
-            --image-tag-mutability MUTABLE  
-
-      - name: Get next version from ECR
-        id: versioning
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          TAGS=$(aws ecr list-images \
-            --repository-name $ECR_REPOSITORY \
-            --query 'imageIds[*].imageTag' \
-            --output text 2>/dev/null | tr '\t' '\n' \
-            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
-            | sort -V \
-            | tail -1)
-
-          echo "Latest version found: $TAGS"
-
-          if [ -z "$TAGS" ]; then
-            NEXT_VERSION="0.1.0"
-          else
-            MAJOR=$(echo $TAGS | cut -d. -f1)
-            MINOR=$(echo $TAGS | cut -d. -f2)
-            PATCH=$(echo $TAGS | cut -d. -f3)
-            NEXT_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
-          fi
-
-          echo "Next version: $NEXT_VERSION"
-          echo "version=${NEXT_VERSION}" >> $GITHUB_ENV
-
-      - name: Build and Push to ECR
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          builder: ${{ steps.buildx.outputs.name }}
-          file: ./Dockerfile
-          push: true
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.version }}
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Set Image URI output
-        id: image
-        run: |
-          # Use shell variable $version (set via $GITHUB_ENV) rather than
-          # ${{ env.version }} expression which may not resolve correctly here
-          echo "image-uri=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${version}" >> $GITHUB_OUTPUT
-          echo "Debug — image URI: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${version}"
-
   deploy-production:
-    needs: build-and-push
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -145,6 +21,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Validate image URI input
+        run: |
+          IMAGE_URI="${{ github.event.inputs.image_uri }}"
+          echo "Deploying image: ${IMAGE_URI}"
+          if [ -z "${IMAGE_URI}" ]; then
+            echo "ERROR: image_uri input is empty"
+            exit 1
+          fi
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -155,23 +40,33 @@ jobs:
 
       - name: Deploy CloudFormation stack
         run: |
-          echo "Deploying with image: ${{ needs.build-and-push.outputs.image-uri }}"
+          IMAGE_URI="${{ github.event.inputs.image_uri }}"
+          echo "Deploying stack ${{ env.STACK_NAME }} with image: ${IMAGE_URI}"
+
           aws cloudformation deploy \
             --template-file ./infra/cloudformation-template.yaml \
             --stack-name ${{ env.STACK_NAME }} \
             --parameter-overrides \
               Environment=production \
-              ImageUri=${{ needs.build-and-push.outputs.image-uri }} \
+              ImageUri=${IMAGE_URI} \
               DatabasePassword=${{ secrets.DB_PASSWORD }} \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset
 
-      - name: Wait for stack update
+      - name: Wait for stack deployment
         run: |
           aws cloudformation wait stack-create-complete \
             --stack-name ${{ env.STACK_NAME }} 2>/dev/null || \
           aws cloudformation wait stack-update-complete \
             --stack-name ${{ env.STACK_NAME }}
+
+      - name: Print CloudFormation failure events
+        if: failure()
+        run: |
+          aws cloudformation describe-stack-events \
+            --stack-name ${{ env.STACK_NAME }} \
+            --query 'StackEvents[?ResourceStatus==`CREATE_FAILED` || ResourceStatus==`UPDATE_FAILED`].[Timestamp,ResourceType,LogicalResourceId,ResourceStatusReason]' \
+            --output table
 
       - name: Get stack outputs
         run: |
@@ -192,20 +87,20 @@ jobs:
           echo "| --- | ----- |" >> $GITHUB_STEP_SUMMARY
           echo "| Stack | ${{ env.STACK_NAME }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Region | ${{ env.AWS_REGION }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Image | ${{ needs.build-and-push.outputs.image-uri }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | ${{ github.event.inputs.image_uri }} |" >> $GITHUB_STEP_SUMMARY
           echo "| App URL | $APP_URL |" >> $GITHUB_STEP_SUMMARY
 
   notify:
-    needs: [build-and-push, deploy-production]
+    needs: deploy-production
     runs-on: ubuntu-latest
     if: always()
     steps:
       - name: Check deployment status
         run: |
           if [ "${{ needs.deploy-production.result }}" == "success" ]; then
-            echo "Deployment successful!"
+            echo "✅ Deployment successful!"
             exit 0
           else
-            echo "Deployment failed!"
+            echo "❌ Deployment failed!"
             exit 1
           fi
