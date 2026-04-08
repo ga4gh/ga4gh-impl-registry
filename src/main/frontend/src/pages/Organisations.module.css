@@ -1,0 +1,79 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.card {
+  background: #fff;
+  border: 1px solid #e0e7ef;
+  border-radius: 7px;
+  padding: 1rem 1.2rem;
+  display: grid;
+  gap: 0.3rem;
+}
+.card h4 { font-size: 0.97rem; color: #1a3a5c; }
+.card p  { font-size: 0.85rem; color: #555; }
+.card p strong { color: #1a3a5c; margin-right: 4px; }
+.card a  { color: #22527a; font-size: 0.85rem; word-break: break-all; }
+
+.formCard {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+.formCard h3 { font-size: 1rem; color: #22527a; margin-bottom: 1rem; }
+
+.form { display: grid; gap: 1rem; }
+.row  { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+
+.form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #34495e;
+  display: block;
+  margin-bottom: 3px;
+}
+.form input,
+.form textarea {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #ccd6e0;
+  border-radius: 5px;
+  background: #fafdff;
+  color: #2c3e50;
+  transition: border 0.2s;
+}
+.form input:focus,
+.form textarea:focus { outline: none; border-color: #4fc3f7; background: #fff; }
+.form textarea { resize: vertical; min-height: 70px; }
+
+.formError {
+  background: #fce4ec;
+  color: #880e4f;
+  border: 1px solid #f48fb1;
+  border-radius: 5px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+.status { color: #7f8c8d; padding: 1rem 0; }
+.error  { color: #880e4f; padding: 1rem 0; }
+
+.btnPrimary {
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.92rem;
+  cursor: pointer;
+  font-weight: 600;
+  background: #1a3a5c;
+  color: #fff;
+  width: fit-content;
+  transition: background 0.2s;
+}
+.btnPrimary:hover:not(:disabled) { background: #22527a; }
+.btnPrimary:disabled { opacity: 0.6; cursor: default; }

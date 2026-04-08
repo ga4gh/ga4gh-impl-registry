@@ -1,0 +1,71 @@
+plugins {
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'java'
+    id 'jacoco'
+}
+
+group = 'org.ga4gh'
+version = '0.1.0'
+sourceCompatibility = '21'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+
+    runtimeOnly 'org.postgresql:postgresql'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.h2database:h2'
+}
+
+// ── Frontend build ────────────────────────────────────────────────────────────
+
+def frontendDir = "$projectDir/src/main/frontend"
+
+task npmInstall(type: Exec) {
+    description = 'Install frontend npm dependencies'
+    workingDir  = frontendDir
+    commandLine 'npm', 'install'
+    // Only re-run if package.json changes
+    inputs.file  "$frontendDir/package.json"
+    outputs.dir  "$frontendDir/node_modules"
+}
+
+task npmBuild(type: Exec, dependsOn: npmInstall) {
+    description = 'Build React frontend with Vite'
+    workingDir  = frontendDir
+    commandLine 'npm', 'run', 'build'
+    // Re-run if any source file changes
+    inputs.dir  "$frontendDir/src"
+    inputs.file "$frontendDir/vite.config.js"
+    outputs.dir "$projectDir/src/main/resources/static"
+}
+
+// Wire frontend build into the main Java build
+processResources.dependsOn npmBuild
+
+// ── Tests ─────────────────────────────────────────────────────────────────────
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required  = true
+        html.required = true
+    }
+}

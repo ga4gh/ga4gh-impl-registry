@@ -1,0 +1,18 @@
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  padding: 1.5rem;
+}
+.row {
+  display: flex;
+  gap: 1rem;
+  padding: 0.4rem 0;
+  font-size: 0.92rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+.row:last-child { border-bottom: none; }
+.row strong { min-width: 140px; color: #1a3a5c; flex-shrink: 0; }
+.row a { color: #22527a; word-break: break-all; }
+.loading { color: #7f8c8d; padding: 2rem; text-align: center; }
+.error   { color: #880e4f; padding: 2rem; text-align: center; }
