@@ -145,6 +145,10 @@ Resources:
           FromPort: 5432
           ToPort: 5432
           SourceSecurityGroupId: !Ref EC2SecurityGroup
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 192.168.1.83/32
       Tags:
         - Key: Name
           Value: !Sub ga4gh-impl-registry-${Environment}-rds-sg
@@ -158,6 +162,7 @@ Resources:
       SubnetIds:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
+        - !Ref PublicSubnet
 
   RDSInstance:
     Type: AWS::RDS::DBInstance
@@ -178,7 +183,7 @@ Resources:
         - !Ref RDSSecurityGroup
       BackupRetentionPeriod: 7
       DeletionProtection: false
-      PubliclyAccessible: false
+      PubliclyAccessible: true
 
   # ── EC2 INSTANCE ROLE ────────────────────────────────────────────────────────
 
@@ -256,6 +261,22 @@ Resources:
 
           echo "✅ GA4GH Registry started"
 
+  # ── ELASTIC IP ───────────────────────────────────────────────────────────────
+
+  ElasticIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: !Sub ga4gh-impl-registry-${Environment}-eip
+
+  ElasticIPAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      InstanceId: !Ref EC2Instance
+      EIP: !Ref ElasticIP
+
   # ── CLOUDWATCH LOG GROUP ─────────────────────────────────────────────────────
 
   AppLogGroup:
@@ -267,20 +288,20 @@ Resources:
 Outputs:
 
   ApplicationURL:
-    Description: Application URL
-    Value: !Sub http://${EC2Instance.PublicDnsName}:8080
+    Description: Application URL (stable across deployments)
+    Value: !Sub http://${ElasticIP}:8080
     Export:
       Name: !Sub ga4gh-impl-registry-${Environment}-url
 
   ServiceInfoURL:
     Description: Service info endpoint
-    Value: !Sub http://${EC2Instance.PublicDnsName}:8080/api/service-info
+    Value: !Sub http://${ElasticIP}:8080/api/service-info
     Export:
       Name: !Sub ga4gh-impl-registry-${Environment}-service-info
 
   UIURL:
     Description: UI URL
-    Value: !Sub http://${EC2Instance.PublicDnsName}:8080/index.html
+    Value: !Sub http://${ElasticIP}:8080/index.html
     Export:
       Name: !Sub ga4gh-impl-registry-${Environment}-ui
 
@@ -289,3 +310,9 @@ Outputs:
     Value: !GetAtt RDSInstance.Endpoint.Address
     Export:
       Name: !Sub ga4gh-impl-registry-${Environment}-rds
+
+  FixedIP:
+    Description: Fixed public IP address (never changes)
+    Value: !Ref ElasticIP
+    Export:
+      Name: !Sub ga4gh-impl-registry-${Environment}-ip
