@@ -50,10 +50,12 @@ jobs:
               Environment=production \
               ImageUri=${IMAGE_URI} \
               DatabasePassword=${{ secrets.DB_PASSWORD }} \
+              CertificateArn=${{ secrets.CERTIFICATE_ARN }} \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset
 
       - name: Wait for stack deployment
+        timeout-minutes: 30
         run: |
           aws cloudformation wait stack-create-complete \
             --stack-name ${{ env.STACK_NAME }} 2>/dev/null || \
@@ -77,9 +79,9 @@ jobs:
 
       - name: Post deployment summary
         run: |
-          APP_URL=$(aws cloudformation describe-stacks \
+          ALB_DNS=$(aws cloudformation describe-stacks \
             --stack-name ${{ env.STACK_NAME }} \
-            --query "Stacks[0].Outputs[?OutputKey=='ApplicationURL'].OutputValue" \
+            --query "Stacks[0].Outputs[?OutputKey=='ALBDnsName'].OutputValue" \
             --output text)
 
           echo "## Production Deployment Successful" >> $GITHUB_STEP_SUMMARY
@@ -88,7 +90,8 @@ jobs:
           echo "| Stack | ${{ env.STACK_NAME }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Region | ${{ env.AWS_REGION }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Image | ${{ github.event.inputs.image_uri }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| App URL | $APP_URL |" >> $GITHUB_STEP_SUMMARY
+          echo "| ALB DNS | ${ALB_DNS} |" >> $GITHUB_STEP_SUMMARY
+          echo "| App URL | https://implementation-registry.ga4gh.org |" >> $GITHUB_STEP_SUMMARY
 
   notify:
     needs: deploy-production

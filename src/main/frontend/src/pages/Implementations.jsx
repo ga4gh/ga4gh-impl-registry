@@ -10,10 +10,10 @@ export function Implementations({ type }) {
   const fetchFn     = useCallback(() => isService ? api.getServices() : api.getDeployments(), [isService])
   const { data, loading, error, refresh } = useApi(fetchFn, [type])
 
-  const { data: standards }     = useApi(api.getStandards)
-  const { data: organisations }  = useApi(api.getOrganisations)
+  const { data: standards }    = useApi(api.getStandards)
+  const { data: organisations } = useApi(api.getOrganisations)
 
-  const [editing, setEditing]   = useState(null)
+  const [editing, setEditing]     = useState(null)
   const [editError, setEditError] = useState(null)
   const showToast = useContext(ToastContext)
 
@@ -22,7 +22,6 @@ export function Implementations({ type }) {
     try {
       if (isService) await api.updateService(editing.id, body)
       else           await api.updateDeployment(editing.id, body)
-      // Refresh the list first, then close modal — card is updated before overlay disappears
       await refresh()
       setEditing(null)
       showToast(`${isService ? 'Service' : 'Deployment'} updated successfully.`)
@@ -74,7 +73,8 @@ function ImplCard({ impl, onEdit }) {
   const wes = id_?.wes
   const tes = id_?.tes
   const trs = id_?.trs
-  const typeClass = impl.implementationType === 'SERVICE' ? styles.tagService : styles.tagDeployment
+  const typeClass  = impl.implementationType === 'SERVICE' ? styles.tagService : styles.tagDeployment
+  const ga4ghProduct = impl.standardVersion?.ga4ghProduct
 
   return (
     <div className={styles.card}>
@@ -88,7 +88,14 @@ function ImplCard({ impl, onEdit }) {
 
       <p><strong>URL:</strong> <a href={impl.url} target="_blank" rel="noopener">{impl.url}</a></p>
       <p><strong>Organisation:</strong> {impl.organisation?.name}</p>
-      <p><strong>Version:</strong> {impl.standardVersion?.version}</p>
+
+      {/* GA4GH Product + version together */}
+      {ga4ghProduct && (
+        <p>
+          <strong>GA4GH Product:</strong> {ga4ghProduct}
+          {impl.standardVersion?.version && ` v${impl.standardVersion.version}`}
+        </p>
+      )}
 
       {impl.environment    && <p><strong>Environment:</strong> {impl.environment}</p>}
       {impl.serviceInfoUrl && <p><strong>Service Info:</strong> <a href={impl.serviceInfoUrl} target="_blank" rel="noopener">{impl.serviceInfoUrl}</a></p>}
@@ -101,12 +108,12 @@ function ImplCard({ impl, onEdit }) {
         <p><strong>Location:</strong> {geo.city ? `${geo.city}, ` : ''}{geo.country}</p>
       )}
 
-      {drs?.objectsCount     != null && <p><strong>DRS Objects:</strong> {drs.objectsCount.toLocaleString()}</p>}
+      {drs?.objectsCount      != null && <p><strong>DRS Objects:</strong> {drs.objectsCount.toLocaleString()}</p>}
       {drs?.storageFootprintGb != null && <p><strong>Storage:</strong> {drs.storageFootprintGb} GB</p>}
-      {wes?.workflowEngines  && <p><strong>WES Engines:</strong> {wes.workflowEngines}</p>}
-      {wes?.workflowsCount   != null && <p><strong>Workflows:</strong> {wes.workflowsCount.toLocaleString()}</p>}
-      {tes?.tasksCount       != null && <p><strong>TES Tasks:</strong> {tes.tasksCount.toLocaleString()}</p>}
-      {trs?.toolsCount       != null && <p><strong>TRS Tools:</strong> {trs.toolsCount.toLocaleString()}</p>}
+      {wes?.workflowEngines   && <p><strong>WES Engines:</strong> {wes.workflowEngines}</p>}
+      {wes?.workflowsCount    != null && <p><strong>Workflows:</strong> {wes.workflowsCount.toLocaleString()}</p>}
+      {tes?.tasksCount        != null && <p><strong>TES Tasks:</strong> {tes.tasksCount.toLocaleString()}</p>}
+      {trs?.toolsCount        != null && <p><strong>TRS Tools:</strong> {trs.toolsCount.toLocaleString()}</p>}
 
       <button className={styles.editBtn} onClick={onEdit}>Edit</button>
     </div>

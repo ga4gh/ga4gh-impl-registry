@@ -17,4 +17,6 @@ public class StandardVersionDto {
     private LocalDate releaseDate;
     private String url;
     private String description;
+    // The GA4GH standard this version belongs to e.g. DRS, WES, TES, TRS
+    private String ga4ghProduct;
 }

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: GA4GH Implementation Registry - Single EC2 + RDS (lightweight)
+Description: GA4GH Implementation Registry - Single EC2 + RDS + ALB with HTTPS
 
 Parameters:
   Environment:
@@ -35,6 +35,10 @@ Parameters:
     Default: ''
     Description: Optional EC2 key pair name for SSH access
 
+  CertificateArn:
+    Type: String
+    Description: ACM certificate ARN for implementation-registry.ga4gh.org
+
 Conditions:
   HasSSHKey: !Not [!Equals [!Ref SSHKeyName, '']]
 
@@ -65,6 +69,7 @@ Resources:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
 
+  # Two public subnets in different AZs — required by ALB
   PublicSubnet:
     Type: AWS::EC2::Subnet
     Properties:
@@ -74,7 +79,18 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ga4gh-impl-registry-${Environment}-public
+          Value: !Sub ga4gh-impl-registry-${Environment}-public-1
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ga4gh-impl-registry-${Environment}-public-2
 
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
@@ -115,18 +131,44 @@ Resources:
       SubnetId: !Ref PublicSubnet
       RouteTableId: !Ref PublicRouteTable
 
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
   # ── SECURITY GROUPS ─────────────────────────────────────────────────────────
 
+  # ALB security group — accepts HTTP (80) and HTTPS (443) from the internet
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP and HTTPS to ALB
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub ga4gh-impl-registry-${Environment}-alb-sg
+
+  # EC2 security group — port 8080 only from ALB, SSH from anywhere
   EC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Allow HTTP and optional SSH to EC2
+      GroupDescription: Allow traffic from ALB to EC2 on 8080, SSH from anywhere
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 8080
           ToPort: 8080
-          CidrIp: 0.0.0.0/0
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
@@ -145,10 +187,6 @@ Resources:
           FromPort: 5432
           ToPort: 5432
           SourceSecurityGroupId: !Ref EC2SecurityGroup
-        - IpProtocol: tcp
-          FromPort: 5432
-          ToPort: 5432
-          CidrIp: 192.168.1.83/32
       Tags:
         - Key: Name
           Value: !Sub ga4gh-impl-registry-${Environment}-rds-sg
@@ -162,7 +200,6 @@ Resources:
       SubnetIds:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
-        - !Ref PublicSubnet
 
   RDSInstance:
     Type: AWS::RDS::DBInstance
@@ -183,7 +220,7 @@ Resources:
         - !Ref RDSSecurityGroup
       BackupRetentionPeriod: 7
       DeletionProtection: false
-      PubliclyAccessible: true
+      PubliclyAccessible: false
 
   # ── EC2 INSTANCE ROLE ────────────────────────────────────────────────────────
 
@@ -215,6 +252,9 @@ Resources:
   EC2Instance:
     Type: AWS::EC2::Instance
     DependsOn: RDSInstance
+    Metadata:
+      # Forces EC2 replacement whenever ImageUri changes
+      ImageUri: !Ref ImageUri
     Properties:
       InstanceType: !Ref InstanceType
       SubnetId: !Ref PublicSubnet
@@ -277,6 +317,71 @@ Resources:
       InstanceId: !Ref EC2Instance
       EIP: !Ref ElasticIP
 
+  # ── APPLICATION LOAD BALANCER ────────────────────────────────────────────────
+
+  ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub ga4gh-impl-registry-${Environment}
+      Subnets:
+        - !Ref PublicSubnet
+        - !Ref PublicSubnet2
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Scheme: internet-facing
+      Type: application
+      Tags:
+        - Key: Name
+          Value: !Sub ga4gh-impl-registry-${Environment}-alb
+
+  # Target group pointing at EC2 on port 8080
+  ALBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ga4gh-impl-reg-${Environment}-tg
+      Port: 8080
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: instance
+      Targets:
+        - Id: !Ref EC2Instance
+          Port: 8080
+      HealthCheckPath: /api/service-info
+      HealthCheckIntervalSeconds: 60
+      HealthCheckTimeoutSeconds: 30
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 5
+      Matcher:
+        HttpCode: 200-499
+
+  # HTTPS listener on port 443 — uses ACM certificate
+  ALBListenerHTTPS:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ALB
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+      Certificates:
+        - CertificateArn: !Ref CertificateArn
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroup
+
+  # HTTP listener on port 80 — redirects all traffic to HTTPS permanently
+  ALBListenerHTTP:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ALB
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: redirect
+          RedirectConfig:
+            Protocol: HTTPS
+            Port: '443'
+            StatusCode: HTTP_301
+
   # ── CLOUDWATCH LOG GROUP ─────────────────────────────────────────────────────
 
   AppLogGroup:
@@ -288,20 +393,26 @@ Resources:
 Outputs:
 
   ApplicationURL:
-    Description: Application URL (stable across deployments)
-    Value: !Sub http://${ElasticIP}:8080
+    Description: Application HTTPS URL
+    Value: https://implementation-registry.ga4gh.org
     Export:
       Name: !Sub ga4gh-impl-registry-${Environment}-url
 
+  ALBDnsName:
+    Description: ALB DNS name — create a CNAME record pointing your domain to this
+    Value: !GetAtt ALB.DNSName
+    Export:
+      Name: !Sub ga4gh-impl-registry-${Environment}-alb-dns
+
   ServiceInfoURL:
     Description: Service info endpoint
-    Value: !Sub http://${ElasticIP}:8080/api/service-info
+    Value: https://implementation-registry.ga4gh.org/api/service-info
     Export:
       Name: !Sub ga4gh-impl-registry-${Environment}-service-info
 
   UIURL:
     Description: UI URL
-    Value: !Sub http://${ElasticIP}:8080/index.html
+    Value: https://implementation-registry.ga4gh.org/index.html
     Export:
       Name: !Sub ga4gh-impl-registry-${Environment}-ui
 
@@ -312,7 +423,7 @@ Outputs:
       Name: !Sub ga4gh-impl-registry-${Environment}-rds
 
   FixedIP:
-    Description: Fixed public IP address (never changes)
+    Description: Fixed EC2 public IP (for reference — traffic goes via ALB)
     Value: !Ref ElasticIP
     Export:
       Name: !Sub ga4gh-impl-registry-${Environment}-ip

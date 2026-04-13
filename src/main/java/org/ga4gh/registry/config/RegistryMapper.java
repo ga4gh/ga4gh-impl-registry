@@ -41,12 +41,18 @@ public class RegistryMapper {
     // ── Standard ──────────────────────────────────────────────────────────────
 
     public StandardVersionDto toStandardVersionDto(StandardVersion sv) {
+        // Safely resolve the abbreviation — standard may be lazily loaded
+        String ga4ghProduct = null;
+        if (sv.getStandard() != null) {
+            ga4ghProduct = sv.getStandard().getAbbreviation();
+        }
         return StandardVersionDto.builder()
                 .id(sv.getId())
                 .version(sv.getVersion())
                 .releaseDate(sv.getReleaseDate())
                 .url(sv.getUrl())
                 .description(sv.getDescription())
+                .ga4ghProduct(ga4ghProduct)
                 .build();
     }
 
@@ -146,15 +152,9 @@ public class RegistryMapper {
         WesDataDto wes = toWesDataDto(impl.getWesData());
         TesDataDto tes = toTesDataDto(impl.getTesData());
         TrsDataDto trs = toTrsDataDto(impl.getTrsData());
-
-        // Return null if no standard-specific data exists for this implementation
         if (drs == null && wes == null && tes == null && trs == null) return null;
-
         return ImplDataDto.builder()
-                .drs(drs)
-                .wes(wes)
-                .tes(tes)
-                .trs(trs)
+                .drs(drs).wes(wes).tes(tes).trs(trs)
                 .build();
     }
 
