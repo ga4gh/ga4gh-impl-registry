@@ -1,3 +1,35 @@
+/* Search */
+.searchRow {
+  position: relative;
+  margin-bottom: 1rem;
+}
+.searchInput {
+  width: 100%;
+  padding: 0.6rem 2.2rem 0.6rem 0.85rem;
+  border: 1px solid #ccd6e0;
+  border-radius: 6px;
+  font-size: 0.92rem;
+  background: #fff;
+  color: #2c3e50;
+  transition: border 0.2s;
+}
+.searchInput:focus { outline: none; border-color: #4fc3f7; }
+.clearBtn {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+.clearBtn:hover { color: #2c3e50; }
+
+/* Grid */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -17,6 +49,7 @@
 .card p strong { color: #1a3a5c; margin-right: 4px; }
 .card a  { color: #22527a; font-size: 0.85rem; word-break: break-all; }
 
+/* Registration form */
 .formCard {
   background: #fff;
   border-radius: 8px;

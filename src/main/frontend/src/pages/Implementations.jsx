@@ -5,9 +5,37 @@ import { EditModal } from '../components/EditModal'
 import { ToastContext } from '../App'
 import styles from './Implementations.module.css'
 
+const DEFINITIONS = {
+  SERVICE: {
+    title: 'What is a service?',
+    text: 'A service refers to a running web server serving genomic data according to a GA4GH API specification.'
+  },
+  DEPLOYMENT: {
+    title: 'What is a deployment?',
+    text: `An implementation refers to any codebase that works with one or more GA4GH standards. Examples include:`,
+    bullets: [
+      'Client libraries for accessing data from GA4GH APIs',
+      'Command-line tools/executables for reading/writing GA4GH format files',
+      'Codebases that can be run to spin-up a GA4GH API server',
+      'Other tools involving complex analyses that make use of GA4GH standards'
+    ]
+  }
+}
+
+function matches(impl, query) {
+  if (!query) return true
+  const q = query.toLowerCase()
+  return (
+    impl.name?.toLowerCase().includes(q) ||
+    impl.implementationId?.toLowerCase().includes(q) ||
+    impl.organisation?.name?.toLowerCase().includes(q) ||
+    impl.standardVersion?.ga4ghProduct?.toLowerCase().includes(q)
+  )
+}
+
 export function Implementations({ type }) {
-  const isService   = type === 'SERVICE'
-  const fetchFn     = useCallback(() => isService ? api.getServices() : api.getDeployments(), [isService])
+  const isService = type === 'SERVICE'
+  const fetchFn   = useCallback(() => isService ? api.getServices() : api.getDeployments(), [isService])
   const { data, loading, error, refresh } = useApi(fetchFn, [type])
 
   const { data: standards }    = useApi(api.getStandards)
@@ -15,7 +43,12 @@ export function Implementations({ type }) {
 
   const [editing, setEditing]     = useState(null)
   const [editError, setEditError] = useState(null)
+  const [query, setQuery]         = useState('')
   const showToast = useContext(ToastContext)
+
+  const def     = DEFINITIONS[type]
+  const title   = isService ? 'Services' : 'Deployments'
+  const filtered = data ? data.filter(d => matches(d, query)) : []
 
   async function handleSave(body) {
     setEditError(null)
@@ -30,20 +63,47 @@ export function Implementations({ type }) {
     }
   }
 
-  const title = isService ? 'Services' : 'Deployments'
-
   return (
     <div>
       <h2>{title}</h2>
+
+      {/* Definition banner */}
+      <div className={styles.defBanner}>
+        <strong>{def.title}</strong>
+        <span>{def.text}</span>
+        {def.bullets && (
+          <ul className={styles.defList}>
+            {def.bullets.map((b, i) => <li key={i}>{b}</li>)}
+          </ul>
+        )}
+      </div>
+
+      {/* Search box */}
+      <div className={styles.searchRow}>
+        <input
+          className={styles.searchInput}
+          type="text"
+          placeholder={`Search by name, ID, organisation or GA4GH product…`}
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+        />
+        {query && (
+          <button className={styles.clearBtn} onClick={() => setQuery('')} title="Clear">×</button>
+        )}
+      </div>
 
       {loading && <div className={styles.loading}>Loading {title.toLowerCase()}…</div>}
       {error   && <div className={styles.error}>Failed to load {title.toLowerCase()}: {error}</div>}
 
       {!loading && !error && (
-        !data?.length
-          ? <div className={styles.empty}>No {title.toLowerCase()} registered yet</div>
+        filtered.length === 0
+          ? <div className={styles.empty}>
+              {data?.length === 0
+                ? `No ${title.toLowerCase()} registered yet`
+                : `No results match "${query}"`}
+            </div>
           : <div className={styles.grid}>
-              {data.map(d => (
+              {filtered.map(d => (
                 <ImplCard
                   key={d.id}
                   impl={d}
@@ -73,7 +133,7 @@ function ImplCard({ impl, onEdit }) {
   const wes = id_?.wes
   const tes = id_?.tes
   const trs = id_?.trs
-  const typeClass  = impl.implementationType === 'SERVICE' ? styles.tagService : styles.tagDeployment
+  const typeClass    = impl.implementationType === 'SERVICE' ? styles.tagService : styles.tagDeployment
   const ga4ghProduct = impl.standardVersion?.ga4ghProduct
 
   return (
@@ -89,7 +149,6 @@ function ImplCard({ impl, onEdit }) {
       <p><strong>URL:</strong> <a href={impl.url} target="_blank" rel="noopener">{impl.url}</a></p>
       <p><strong>Organisation:</strong> {impl.organisation?.name}</p>
 
-      {/* GA4GH Product + version together */}
       {ga4ghProduct && (
         <p>
           <strong>GA4GH Product:</strong> {ga4ghProduct}

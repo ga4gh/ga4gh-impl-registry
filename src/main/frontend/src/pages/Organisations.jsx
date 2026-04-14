@@ -4,13 +4,26 @@ import { useApi } from '../hooks/useApi'
 import { ToastContext } from '../App'
 import styles from './Organisations.module.css'
 
+function matches(org, query) {
+  if (!query) return true
+  const q = query.toLowerCase()
+  return (
+    org.name?.toLowerCase().includes(q) ||
+    org.orgId?.toLowerCase().includes(q) ||
+    org.shortName?.toLowerCase().includes(q)
+  )
+}
+
 export function Organisations() {
   const { data, loading, error, refresh } = useApi(api.getOrganisations)
   const showToast = useContext(ToastContext)
 
-  const [form, setForm]     = useState({ orgId: '', name: '', shortName: '', url: '', description: '' })
+  const [form, setForm]       = useState({ orgId: '', name: '', shortName: '', url: '', description: '' })
   const [formError, setFormError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const [query, setQuery]     = useState('')
+
+  const filtered = data ? data.filter(o => matches(o, query)) : []
 
   function set(field, value) { setForm(p => ({ ...p, [field]: value })) }
 
@@ -40,14 +53,30 @@ export function Organisations() {
     <div>
       <h2>Organisations</h2>
 
+      {/* Search box */}
+      <div className={styles.searchRow}>
+        <input
+          className={styles.searchInput}
+          type="text"
+          placeholder="Search by name, organisation ID or short name…"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+        />
+        {query && (
+          <button className={styles.clearBtn} onClick={() => setQuery('')} title="Clear">×</button>
+        )}
+      </div>
+
       {loading && <div className={styles.status}>Loading organisations…</div>}
       {error   && <div className={styles.error}>Failed to load organisations: {error}</div>}
 
       {!loading && !error && (
-        !data?.length
-          ? <div className={styles.status}>No organisations registered yet</div>
+        filtered.length === 0
+          ? <div className={styles.status}>
+              {data?.length === 0 ? 'No organisations registered yet' : `No results match "${query}"`}
+            </div>
           : <div className={styles.grid}>
-              {data.map(o => (
+              {filtered.map(o => (
                 <div key={o.id} className={styles.card}>
                   <h4>{o.name}</h4>
                   {o.orgId     && <p><strong>Org ID:</strong> {o.orgId}</p>}

@@ -1,12 +1,13 @@
 import React from 'react'
 import { NavLink, Routes, Route, Navigate } from 'react-router-dom'
-import { ServiceInfo }   from './pages/ServiceInfo'
-import { Standards }     from './pages/Standards'
+import { Home }            from './pages/Home'
+import { ServiceInfo }     from './pages/ServiceInfo'
+import { Standards }       from './pages/Standards'
 import { Implementations } from './pages/Implementations'
-import { Organisations } from './pages/Organisations'
-import { Register }      from './pages/Register'
-import { Toast }         from './components/Toast'
-import { useToast }      from './hooks/useToast'
+import { Organisations }   from './pages/Organisations'
+import { Register }        from './pages/Register'
+import { Toast }           from './components/Toast'
+import { useToast }        from './hooks/useToast'
 import styles from './App.module.css'
 
 export const ToastContext = React.createContext(null)
@@ -18,12 +19,13 @@ export default function App() {
     <ToastContext.Provider value={showToast}>
       <header className={styles.header}>
         <div>
-          <h1>GA4GH Registry</h1>
+          <h1>GA4GH Implementation Registry</h1>
           <span>Registry of GA4GH Cloud API Implementations</span>
         </div>
       </header>
 
       <nav className={styles.nav}>
+        <NavLink to="/"              end className={({ isActive }) => isActive ? styles.active : ''}>Home</NavLink>
         <NavLink to="/service-info"  className={({ isActive }) => isActive ? styles.active : ''}>Service Info</NavLink>
         <NavLink to="/standards"     className={({ isActive }) => isActive ? styles.active : ''}>Standards</NavLink>
         <NavLink to="/services"      className={({ isActive }) => isActive ? styles.active : ''}>Services</NavLink>
@@ -34,13 +36,14 @@ export default function App() {
 
       <main className={styles.main}>
         <Routes>
-          <Route path="/"              element={<Navigate to="/service-info" replace />} />
+          <Route path="/"              element={<Home />} />
           <Route path="/service-info"  element={<ServiceInfo />} />
           <Route path="/standards"     element={<Standards />} />
           <Route path="/services"      element={<Implementations type="SERVICE" />} />
           <Route path="/deployments"   element={<Implementations type="DEPLOYMENT" />} />
           <Route path="/organisations" element={<Organisations />} />
           <Route path="/register"      element={<Register />} />
+          <Route path="*"              element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 
