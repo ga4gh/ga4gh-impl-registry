@@ -11,16 +11,17 @@ async function request(path, options = {}) {
 }
 
 export const api = {
-  getServiceInfo:    () => request('/service-info'),
-  getStandards:      () => request('/standards'),
-  getServices:       () => request('/services'),
-  getDeployments:    () => request('/deployments'),
-  getOrganisations:  () => request('/organisations'),
+  getServiceInfo:     () => request('/service-info'),
+  getStandards:       () => request('/standards'),
+  getServices:        () => request('/services'),
+  getDeployments:     () => request('/deployments'),
+  getOrganisations:   () => request('/organisations'),
 
-  createService:     (body) => request('/services',     { method: 'POST', body: JSON.stringify(body) }),
-  createDeployment:  (body) => request('/deployments',  { method: 'POST', body: JSON.stringify(body) }),
-  createOrganisation:(body) => request('/organisations', { method: 'POST', body: JSON.stringify(body) }),
+  createService:      (body) => request('/services',      { method: 'POST', body: JSON.stringify(body) }),
+  createDeployment:   (body) => request('/deployments',   { method: 'POST', body: JSON.stringify(body) }),
+  createOrganisation: (body) => request('/organisations', { method: 'POST', body: JSON.stringify(body) }),
 
-  updateService:     (id, body) => request(`/services/${id}`,    { method: 'PUT', body: JSON.stringify(body) }),
-  updateDeployment:  (id, body) => request(`/deployments/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  updateService:      (id, body) => request(`/services/${id}`,      { method: 'PUT', body: JSON.stringify(body) }),
+  updateDeployment:   (id, body) => request(`/deployments/${id}`,   { method: 'PUT', body: JSON.stringify(body) }),
+  updateOrganisation: (id, body) => request(`/organisations/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
 }

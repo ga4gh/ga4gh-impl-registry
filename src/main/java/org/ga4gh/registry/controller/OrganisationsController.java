@@ -30,8 +30,16 @@ public class OrganisationsController {
     }
 
     @PostMapping
-    public ResponseEntity<OrganisationDto> createOrganisation(@Valid @RequestBody OrganisationRequest request) {
-        OrganisationDto created = organisationService.createOrganisation(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<OrganisationDto> createOrganisation(
+            @Valid @RequestBody OrganisationRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(organisationService.createOrganisation(request));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<OrganisationDto> updateOrganisation(
+            @PathVariable UUID id,
+            @Valid @RequestBody OrganisationRequest request) {
+        return ResponseEntity.ok(organisationService.updateOrganisation(id, request));
     }
 }

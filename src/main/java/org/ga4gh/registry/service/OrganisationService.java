@@ -34,7 +34,17 @@ public class OrganisationService {
 
     public OrganisationDto createOrganisation(OrganisationRequest request) {
         Organisation org = mapper.toOrganisationEntity(request);
-        Organisation saved = organisationRepository.save(org);
-        return mapper.toOrganisationDto(saved);
+        return mapper.toOrganisationDto(organisationRepository.save(org));
+    }
+
+    public OrganisationDto updateOrganisation(UUID id, OrganisationRequest request) {
+        Organisation org = organisationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Organisation", id.toString()));
+        org.setOrgId(request.getOrgId());
+        org.setName(request.getName());
+        org.setShortName(request.getShortName());
+        org.setUrl(request.getUrl());
+        org.setDescription(request.getDescription());
+        return mapper.toOrganisationDto(organisationRepository.save(org));
     }
 }

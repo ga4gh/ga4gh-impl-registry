@@ -41,7 +41,8 @@
   border: 1px solid #e0e7ef;
   border-radius: 7px;
   padding: 1rem 1.2rem;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.3rem;
 }
 .card h4 { font-size: 0.97rem; color: #1a3a5c; }
@@ -49,7 +50,22 @@
 .card p strong { color: #1a3a5c; margin-right: 4px; }
 .card a  { color: #22527a; font-size: 0.85rem; word-break: break-all; }
 
-/* Registration form */
+.editBtn {
+  margin-top: 0.5rem;
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #a5d6a7;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  align-self: flex-start;
+  transition: background 0.2s;
+}
+.editBtn:hover { background: #c8e6c9; }
+
+/* Registration form card */
 .formCard {
   background: #fff;
   border-radius: 8px;
@@ -79,6 +95,8 @@
   background: #fafdff;
   color: #2c3e50;
   transition: border 0.2s;
+  font-family: inherit;
+  font-size: 0.92rem;
 }
 .form input:focus,
 .form textarea:focus { outline: none; border-color: #4fc3f7; background: #fff; }
@@ -93,6 +111,7 @@
   font-size: 0.9rem;
   margin-bottom: 0.75rem;
 }
+
 .status { color: #7f8c8d; padding: 1rem 0; }
 .error  { color: #880e4f; padding: 1rem 0; }
 
@@ -110,3 +129,56 @@
 }
 .btnPrimary:hover:not(:disabled) { background: #22527a; }
 .btnPrimary:disabled { opacity: 0.6; cursor: default; }
+
+.btnSecondary {
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.92rem;
+  cursor: pointer;
+  font-weight: 600;
+  background: #e0e7ef;
+  color: #1a3a5c;
+  transition: background 0.2s;
+}
+.btnSecondary:hover { background: #c8d6e8; }
+
+/* Modal */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 2rem 1rem;
+}
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem 0.75rem;
+  border-bottom: 1px solid #e0e7ef;
+}
+.modalHeader h3 { font-size: 1.1rem; color: #1a3a5c; margin: 0; }
+.modalClose {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #7f8c8d;
+  line-height: 1;
+  padding: 0;
+}
+.modalClose:hover { color: #2c3e50; }
+.modalBody { padding: 1.25rem 1.5rem 1.5rem; }
+.modalActions { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
