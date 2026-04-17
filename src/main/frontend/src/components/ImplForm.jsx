@@ -30,10 +30,8 @@ export function ImplForm({ initial = EMPTY, standards = [], organisations = [], 
   const [versions, setVersions] = useState([])
   const [geoErrors, setGeoErrors] = useState({})
 
-  // Reset form when initial changes (e.g. opening edit modal with new data)
   useEffect(() => { setF(initial); }, [initial])
 
-  // When standard changes, update available versions
   useEffect(() => {
     const std = standards.find(s => s.id === f.standardId)
     setVersions(std?.versions || [])
@@ -100,6 +98,11 @@ export function ImplForm({ initial = EMPTY, standards = [], organisations = [], 
       geolocation: hasGeo ? { latitude: +geo.latitude || null, longitude: +geo.longitude || null, country: geo.country.toUpperCase() || null, city: geo.city.toUpperCase() || null } : null,
       implData: buildImplData()
     })
+  }
+
+  // Helper: build the label shown in the organisation dropdown option
+  function orgLabel(o) {
+    return o.orgId ? `${o.name} (${o.orgId})` : o.name
   }
 
   return (
@@ -249,7 +252,10 @@ export function ImplForm({ initial = EMPTY, standards = [], organisations = [], 
         <label>Organisation *</label>
         <select value={f.organisationId} onChange={e => set('organisationId', e.target.value)} required>
           <option value="">-- Select organisation --</option>
-          {organisations.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+          {/* Show name + orgId so duplicates with same name can be distinguished */}
+          {organisations.map(o => (
+            <option key={o.id} value={o.id}>{orgLabel(o)}</option>
+          ))}
         </select>
       </div>
 
