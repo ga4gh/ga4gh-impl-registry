@@ -1,33 +1,22 @@
 /* Search */
-.searchRow {
-  position: relative;
-  margin-bottom: 1rem;
-}
+.searchRow { position: relative; margin-bottom: 1rem; }
 .searchInput {
   width: 100%;
   padding: 0.6rem 2.2rem 0.6rem 0.85rem;
-  border: 1px solid #ccd6e0;
+  border: 1px solid #e8e8e8;
   border-radius: 6px;
   font-size: 0.92rem;
   background: #fff;
-  color: #2c3e50;
+  color: #363636;
+  font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;
   transition: border 0.2s;
 }
-.searchInput:focus { outline: none; border-color: #4fc3f7; }
+.searchInput:focus { outline: none; border-color: #4faedc; }
 .clearBtn {
-  position: absolute;
-  right: 0.6rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  color: #7f8c8d;
-  cursor: pointer;
-  line-height: 1;
-  padding: 0;
+  position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%);
+  background: none; border: none; font-size: 1.2rem; color: #77787b; cursor: pointer; line-height: 1; padding: 0;
 }
-.clearBtn:hover { color: #2c3e50; }
+.clearBtn:hover { color: #363636; }
 
 /* Grid */
 .grid {
@@ -38,42 +27,43 @@
 }
 .card {
   background: #fff;
-  border: 1px solid #e0e7ef;
-  border-radius: 7px;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
   padding: 1rem 1.2rem;
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
 }
-.card h4 { font-size: 0.97rem; color: #1a3a5c; }
-.card p  { font-size: 0.85rem; color: #555; }
-.card p strong { color: #1a3a5c; margin-right: 4px; }
-.card a  { color: #22527a; font-size: 0.85rem; word-break: break-all; }
+.card h4 { font-size: 0.97rem; color: #02266a; font-family: 'Work Sans', sans-serif; font-weight: 700; }
+.card p  { font-size: 0.85rem; color: #363636; }
+.card p strong { color: #02266a; margin-right: 4px; }
+.card a  { color: #1b75bb; font-size: 0.85rem; word-break: break-all; }
 
 .editBtn {
   margin-top: 0.5rem;
-  background: #e8f5e9;
-  color: #1b5e20;
-  border: 1px solid #a5d6a7;
-  padding: 0.3rem 0.8rem;
+  background: #1b75bb;
+  color: #fff;
+  border: none;
+  padding: 0.3rem 0.9rem;
   font-size: 0.8rem;
   border-radius: 4px;
   cursor: pointer;
   font-weight: 600;
   align-self: flex-start;
+  font-family: 'Work Sans', sans-serif;
   transition: background 0.2s;
 }
-.editBtn:hover { background: #c8e6c9; }
+.editBtn:hover { background: #02266a; }
 
-/* Registration form card */
+/* Registration form */
 .formCard {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  background: #f4f4f4;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
   padding: 1.5rem;
   margin-top: 1rem;
 }
-.formCard h3 { font-size: 1rem; color: #22527a; margin-bottom: 1rem; }
+.formCard h3 { font-size: 1rem; color: #02266a; margin-bottom: 1rem; font-family: 'Work Sans', sans-serif; font-weight: 700; }
 
 .form { display: grid; gap: 1rem; }
 .row  { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -82,38 +72,38 @@
 .form label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #34495e;
+  color: #363636;
   display: block;
   margin-bottom: 3px;
+  font-family: 'Work Sans', sans-serif;
 }
 .form input,
 .form textarea {
   width: 100%;
   padding: 0.55rem 0.75rem;
-  border: 1px solid #ccd6e0;
+  border: 1px solid #e8e8e8;
   border-radius: 5px;
-  background: #fafdff;
-  color: #2c3e50;
-  transition: border 0.2s;
-  font-family: inherit;
+  background: #fff;
+  color: #363636;
+  font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;
   font-size: 0.92rem;
+  transition: border 0.2s;
 }
-.form input:focus,
-.form textarea:focus { outline: none; border-color: #4fc3f7; background: #fff; }
+.form input:focus, .form textarea:focus { outline: none; border-color: #4faedc; }
 .form textarea { resize: vertical; min-height: 70px; }
 
 .formError {
-  background: #fce4ec;
-  color: #880e4f;
-  border: 1px solid #f48fb1;
+  background: #fde8e6;
+  color: #e34a3a;
+  border: 1px solid #f5b8b3;
   border-radius: 5px;
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
   margin-bottom: 0.75rem;
 }
 
-.status { color: #7f8c8d; padding: 1rem 0; }
-.error  { color: #880e4f; padding: 1rem 0; }
+.status { color: #77787b; padding: 1rem 0; }
+.error  { color: #e34a3a; padding: 1rem 0; }
 
 .btnPrimary {
   padding: 0.6rem 1.4rem;
@@ -121,13 +111,14 @@
   border-radius: 5px;
   font-size: 0.92rem;
   cursor: pointer;
-  font-weight: 600;
-  background: #1a3a5c;
+  font-weight: 700;
+  background: #1b75bb;
   color: #fff;
   width: fit-content;
+  font-family: 'Work Sans', sans-serif;
   transition: background 0.2s;
 }
-.btnPrimary:hover:not(:disabled) { background: #22527a; }
+.btnPrimary:hover:not(:disabled) { background: #02266a; }
 .btnPrimary:disabled { opacity: 0.6; cursor: default; }
 
 .btnSecondary {
@@ -137,16 +128,16 @@
   font-size: 0.92rem;
   cursor: pointer;
   font-weight: 600;
-  background: #e0e7ef;
-  color: #1a3a5c;
+  background: #e8e8e8;
+  color: #02266a;
+  font-family: 'Work Sans', sans-serif;
   transition: background 0.2s;
 }
-.btnSecondary:hover { background: #c8d6e8; }
+.btnSecondary:hover { background: #d0d0d0; }
 
 /* Modal */
 .modalBackdrop {
-  position: fixed;
-  inset: 0;
+  position: fixed; inset: 0;
   background: rgba(0,0,0,0.45);
   z-index: 1000;
   display: flex;
@@ -167,18 +158,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 1.5rem 0.75rem;
-  border-bottom: 1px solid #e0e7ef;
+  border-bottom: 1px solid #e8e8e8;
 }
-.modalHeader h3 { font-size: 1.1rem; color: #1a3a5c; margin: 0; }
-.modalClose {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #7f8c8d;
-  line-height: 1;
-  padding: 0;
-}
-.modalClose:hover { color: #2c3e50; }
+.modalHeader h3 { font-size: 1.1rem; color: #02266a; margin: 0; font-family: 'Work Sans', sans-serif; font-weight: 700; }
+.modalClose { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #77787b; line-height: 1; padding: 0; }
+.modalClose:hover { color: #363636; }
 .modalBody { padding: 1.25rem 1.5rem 1.5rem; }
 .modalActions { display: flex; gap: 0.75rem; margin-top: 0.5rem; }

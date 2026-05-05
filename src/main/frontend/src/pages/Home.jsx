@@ -7,36 +7,31 @@ const NAV_ITEMS = [
     path: '/services',
     label: 'Services',
     icon: '🖥️',
-    description:
-      'Browse running web servers that serve genomic data according to a GA4GH API specification. Each service is a live, queryable endpoint.'
+    description: 'Browse running web servers serving genomic data according to a GA4GH API specification.'
   },
   {
     path: '/deployments',
     label: 'Deployments',
     icon: '📦',
-    description:
-      'Browse codebases and tools that implement one or more GA4GH standards — including client libraries, command-line tools, and server implementations that can be spun up.'
+    description: 'Browse codebases and tools that implement one or more GA4GH standards — client libraries, CLIs, and server implementations.'
   },
   {
     path: '/organisations',
     label: 'Organisations',
     icon: '🏛️',
-    description:
-      'Browse the organisations that have registered services or deployments in this registry.'
+    description: 'Browse the organisations that have registered services or deployments in this registry.'
   },
   {
     path: '/standards',
     label: 'Standards',
     icon: '📋',
-    description:
-      'View the GA4GH standards tracked by this registry, including DRS, WES, TES, TRS, htsget, refget, and Sequence Collections.'
+    description: 'View the GA4GH standards tracked here, including DRS, WES, TES, TRS, htsget, refget, Beacon and more.'
   },
   {
     path: '/register',
     label: 'Register',
     icon: '✏️',
-    description:
-      'Register a new service or deployment implementation. All submissions are manually curated by the GA4GH team before appearing in the registry.'
+    description: 'Register a new service or deployment. All submissions are manually curated by the GA4GH team before appearing here.'
   }
 ]
 
@@ -44,25 +39,26 @@ export function Home() {
   const navigate = useNavigate()
 
   return (
-    <div className={styles.page}>
+    <div>
+      {/* Hero — bleed past .main padding via negative margin in CSS */}
+      <div className={styles.hero}>
+        <div className={styles.heroBox}>
+          <h2 className={styles.heroTitle}>GA4GH Implementation Registry</h2>
+          <p className={styles.heroSubtitle}>
+            A community registry of services, deployments, and tools that implement
+            GA4GH Cloud API standards — including DRS, WES, TES, TRS, htsget,
+            refget, Beacon, and Sequence Collections.
+          </p>
+        </div>
+      </div>
 
-      {/* Curation banner */}
+      {/* Curation notice */}
       <div className={styles.curationBanner}>
         <span className={styles.bannerIcon}>ℹ️</span>
         <span>
           All data in the Implementation Registry will be manually curated
           before being made available in the Service Registry.
         </span>
-      </div>
-
-      {/* Hero */}
-      <div className={styles.hero}>
-        <h2 className={styles.heroTitle}>GA4GH Implementation Registry</h2>
-        <p className={styles.heroSubtitle}>
-          A community registry of services, deployments, and tools that implement
-          GA4GH Cloud API standards — including DRS, WES, TES, TRS, htsget, refget,
-          and Sequence Collections.
-        </p>
       </div>
 
       {/* Navigation guide */}
@@ -80,7 +76,6 @@ export function Home() {
           </button>
         ))}
       </div>
-
     </div>
   )
 }

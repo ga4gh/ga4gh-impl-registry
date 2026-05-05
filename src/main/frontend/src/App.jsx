@@ -17,13 +17,24 @@ export default function App() {
 
   return (
     <ToastContext.Provider value={showToast}>
+
+      {/* ── Header ── */}
       <header className={styles.header}>
-        <div>
-          <h1>GA4GH Implementation Registry</h1>
-          <span>Registry of GA4GH Cloud API Implementations</span>
+        <div className={styles.headerLeft}>
+          <img
+            src="/assets/logo-full-color.svg"
+            alt="GA4GH logo"
+            className={styles.logo}
+          />
+          <div className={styles.headerDivider} />
+          <div className={styles.headerTitle}>
+            <h1>Implementation Registry</h1>
+            <span>Registry of GA4GH Cloud API Implementations</span>
+          </div>
         </div>
       </header>
 
+      {/* ── Tab nav ── */}
       <nav className={styles.nav}>
         <NavLink to="/"              end className={({ isActive }) => isActive ? styles.active : ''}>Home</NavLink>
         <NavLink to="/service-info"  className={({ isActive }) => isActive ? styles.active : ''}>Service Info</NavLink>
@@ -34,6 +45,7 @@ export default function App() {
         <NavLink to="/register"      className={({ isActive }) => isActive ? styles.active : ''}>+ Register</NavLink>
       </nav>
 
+      {/* ── Page content ── */}
       <main className={styles.main}>
         <Routes>
           <Route path="/"              element={<Home />} />
@@ -46,6 +58,12 @@ export default function App() {
           <Route path="*"              element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+
+      {/* ── Footer ── */}
+      <footer className={styles.footer}>
+        <span>© {new Date().getFullYear()} Global Alliance for Genomics and Health · </span>
+        <a href="https://www.ga4gh.org" target="_blank" rel="noopener">ga4gh.org</a>
+      </footer>
 
       <Toast message={message} visible={visible} />
     </ToastContext.Provider>

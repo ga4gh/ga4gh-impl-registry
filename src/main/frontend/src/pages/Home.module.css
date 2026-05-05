@@ -1,81 +1,124 @@
-.page { display: grid; gap: 1.5rem; }
+/* ── Hero ─────────────────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  min-height: 420px;
+  background: linear-gradient(270deg, #00a99d, #8cc63e);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  margin: -2rem -1rem 2rem;   /* bleed past .main padding */
+}
 
-/* Curation banner */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  background-image: url("/assets/logo-tower-white.svg");
+  background-repeat: repeat-y;
+  background-size: 60%;
+  background-position: 80% 50%;
+  z-index: 0;
+}
+
+.heroBox {
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  margin: 0 40px 0 40px;
+  margin-bottom: -32px;     /* overlap onto content below */
+  padding: 36px 40px;
+  max-width: 560px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+}
+
+.heroTitle {
+  margin: 0 0 0.75rem;
+  font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  color: #1b75bb;
+  line-height: 1.2;
+}
+
+.heroSubtitle {
+  margin: 0;
+  font-family: 'Figtree', 'Work Sans', Arial, sans-serif;
+  font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+  color: #363636;
+  line-height: 1.6;
+}
+
+/* ── Curation banner ──────────────────────────────────────────────────────── */
 .curationBanner {
   display: flex;
   align-items: flex-start;
   gap: 0.6rem;
   background: #fff8e1;
   border: 1px solid #ffe082;
-  border-left: 4px solid #ffc107;
+  border-left: 4px solid #faa633;
   border-radius: 6px;
   padding: 0.85rem 1.1rem;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: #5d4037;
   line-height: 1.5;
+  margin-top: 48px;           /* clear the overlapping heroBox */
 }
+
 .bannerIcon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
 
-/* Hero */
-.hero {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  padding: 2rem;
-  text-align: center;
-}
-.heroTitle {
-  font-size: 1.5rem;
-  color: #1a3a5c;
-  margin-bottom: 0.75rem;
-}
-.heroSubtitle {
-  font-size: 0.97rem;
-  color: #555;
-  max-width: 680px;
-  margin: 0 auto;
-  line-height: 1.6;
-}
-
-/* Section title */
+/* ── Section title ────────────────────────────────────────────────────────── */
 .sectionTitle {
-  font-size: 1rem;
-  color: #1a3a5c;
-  font-weight: 600;
+  font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  color: #02266a;
+  margin: 1.75rem 0 1rem;
 }
 
-/* Nav grid */
+/* ── Nav cards grid ───────────────────────────────────────────────────────── */
 .navGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .navCard {
-  background: #fff;
-  border: 1px solid #e0e7ef;
-  border-radius: 8px;
+  background: #f4f4f4;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
   padding: 1.25rem;
   text-align: left;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  transition: box-shadow 0.2s, border-color 0.2s;
-}
-.navCard:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  border-color: #4fc3f7;
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s;
 }
 
-.navIcon { font-size: 1.5rem; }
+.navCard:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  border-color: #4faedc;
+  background: #ffffff;
+}
+
+.navIcon  { font-size: 1.5rem; }
 .navLabel {
+  font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;
   font-size: 0.97rem;
   font-weight: 700;
-  color: #1a3a5c;
+  color: #02266a;
 }
 .navDesc {
   font-size: 0.83rem;
-  color: #666;
+  color: #77787b;
   line-height: 1.5;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero { min-height: 260px; align-items: flex-start; padding-top: 2rem; }
+  .heroBox { margin: 1rem; margin-bottom: -24px; padding: 24px 20px; }
+  .curationBanner { margin-top: 36px; }
 }

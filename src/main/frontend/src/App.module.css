@@ -1,34 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700&family=Figtree:wght@300;400;600;700&display=swap');
+
+/* ── Variables ────────────────────────────────────────────────────────────── */
+:root {
+  --heroblue:   #02266a;
+  --darkblue:   #1b75bb;
+  --lightblue:  #4faedc;
+  --orange:     #faa633;
+  --red:        #e34a3a;
+  --green:      #8cc63e;
+  --darkgreen:  #00a99d;
+  --purple:     #9f79b0;
+  --headergrey: #f8f8f8;
+  --lightgrey:  #f4f4f4;
+  --grey:       #e8e8e8;
+  --border-grey:#77787b;
+  --dark:       #363636;
+  --white:      #ffffff;
+
+  --gradient-green-darkgreen: linear-gradient(270deg, var(--darkgreen), var(--green));
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
 .header {
-  background: #1a3a5c;
-  color: #fff;
-  padding: 1rem 2rem;
+  background-color: var(--white);
+  border-bottom: 2px solid var(--dark);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 0 40px;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
+  height: 72px;
 }
-.header h1 { font-size: 1.4rem; font-weight: 600; margin: 0; }
-.header span { font-size: 0.9rem; opacity: 0.7; }
 
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+}
+
+.headerDivider {
+  width: 1px;
+  height: 36px;
+  background-color: var(--border-grey);
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.headerTitle h1 {
+  margin: 0;
+  font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--heroblue);
+  line-height: 1.2;
+}
+
+.headerTitle span {
+  font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.75rem;
+  color: var(--border-grey);
+  font-weight: 400;
+}
+
+/* ── Nav ──────────────────────────────────────────────────────────────────── */
 .nav {
-  background: #22527a;
+  background-color: var(--heroblue);
   display: flex;
   gap: 0;
   overflow-x: auto;
 }
+
 .nav a {
   background: none;
   border: none;
-  color: #cde;
+  color: #c5d8ec;
   padding: 0.75rem 1.4rem;
-  cursor: pointer;
   font-size: 0.9rem;
+  font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
   border-bottom: 3px solid transparent;
   transition: all 0.2s;
   white-space: nowrap;
   text-decoration: none;
   display: inline-block;
 }
-.nav a:hover { background: rgba(255,255,255,0.08); color: #fff; }
-.nav a.active { color: #fff; border-bottom-color: #4fc3f7; background: rgba(255,255,255,0.1); }
 
-.main { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+.nav a:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--white);
+}
+
+.active {
+  color: var(--white) !important;
+  border-bottom-color: var(--lightblue) !important;
+  background: rgba(255,255,255,0.1) !important;
+}
+
+/* ── Main content ─────────────────────────────────────────────────────────── */
+.main {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+.footer {
+  background-color: var(--dark);
+  color: var(--white);
+  font-size: 0.9rem;
+  font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
+  padding: 24px 40px;
+  text-align: center;
+  margin-top: 4rem;
+}
+
+.footer a {
+  color: var(--lightblue);
+  text-decoration: none;
+}
+
+.footer a:hover { text-decoration: underline; }
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .header { padding: 0 1rem; height: auto; padding-top: 12px; padding-bottom: 12px; }
+  .headerTitle h1 { font-size: 0.9rem; }
+  .logo { height: 30px; }
+}
